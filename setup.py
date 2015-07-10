@@ -50,8 +50,6 @@ if sys.platform == 'darwin':
      pass
 else:
      linkflags.append('-lrt')
-     linkflags.append('-Wl,-z,origin')
-     linkflags.append('-Wl,-rpath=$ORIGIN/lib')
 
 
 ext_modules = [
