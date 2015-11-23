@@ -2,7 +2,7 @@ import sys, os
 import tempfile
 import mapnik
 import pytest
-from .utilities import execution_path
+from .utilities import execution_path, images_almost_equal
 
 @pytest.fixture(scope="module")
 def setup():
@@ -254,4 +254,4 @@ if 'shape' in mapnik.DatasourceCache.plugin_names():
             # color png
             actual = mapnik.Image.open(actual_file)
             expected = mapnik.Image.open(expected_file)
-            assert actual.to_string('png32') == expected.to_string('png32'), 'failed comparing actual (%s) and expected (%s)' % (actual_file, expected_file)
+            images_almost_equal(actual, expected)
