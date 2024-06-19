@@ -6,29 +6,32 @@ import sys
 import subprocess
 import os
 
-mapnik_config = 'mapnik-config'
-
-def check_output(args):
-     output = subprocess.check_output(args).decode()
-     return output.rstrip('\n')
-
-linkflags = []
-lib_path = os.path.join(check_output([mapnik_config, '--prefix']),'lib')
-linkflags.extend(check_output([mapnik_config, '--libs']).split(' '))
-linkflags.extend(check_output([mapnik_config, '--ldflags']).split(' '))
-linkflags.extend(check_output([mapnik_config, '--dep-libs']).split(' '))
-linkflags.extend([
-    '-lmapnik-wkt',
-    '-lmapnik-json',
-])
+lib_path = '/usr/lib64'
+linkflags = [
+    '-lmapnik',
+    '-lmapnikwkt',
+    '-lmapnikjson',
+    '-licui18n',
+    '-licuuc',
+    '-licudata',
+    '-lharfbuzz',
+    '-lfreetype',
+    '-lxml2',
+    '-lpng16',
+    '-ljpeg',
+    '-ltiff',
+    '-lwebp',
+    '-lcairo',
+    '-lproj'
+]
 
 # Dynamically make the mapnik/paths.py file
 f_paths = open('packaging/mapnik/paths.py', 'w')
 f_paths.write('import os\n')
 f_paths.write('\n')
 
-input_plugin_path = check_output([mapnik_config, '--input-plugins'])
-font_path = check_output([mapnik_config, '--fonts'])
+input_plugin_path = '/usr/lib64/mapnik/input'
+font_path = '/usr/share/fonts'
 
 if os.environ.get('LIB_DIR_NAME'):
     mapnik_lib_path = lib_path + os.environ.get('LIB_DIR_NAME')
@@ -43,8 +46,37 @@ else:
         "__all__ = [mapniklibpath,inputpluginspath,fontscollectionpath]\n")
     f_paths.close()
 
-extra_comp_args = check_output([mapnik_config, '--cflags']).split(' ')
-extra_comp_args = list(filter(lambda arg: arg != "-fvisibility=hidden", extra_comp_args))
+extra_comp_args = [
+    '-I/usr/include/mapnik',
+    '-I/usr/include/mapnik/agg',
+    '-DMAPNIK_THREADSAFE',
+    '-DBOOST_REGEX_HAS_ICU',
+    '-DBIGINT',
+    '-DMAPNIK_MEMORY_MAPPED_FILE',
+    '-DHAVE_LIBXML2',
+    '-DHAVE_PNG',
+    '-DHAVE_JPEG',
+    '-DHAVE_TIFF',
+    '-DHAVE_WEBP',
+    '-DHAVE_CAIRO',
+    '-DMAPNIK_USE_PROJ',
+    '-DMAPNIK_PROJ_VERSION=90401',
+    '-DGRID_RENDERER',
+    '-DSVG_RENDERER',
+    '-DMAPNIK_HAS_DLCFN',
+    '-I/usr/include/harfbuzz',
+    '-I/usr/include/cairo',
+    '-I/usr/include/libpng16',
+    '-I/usr/include/libxml2',
+    '-I/usr/include/freetype2',
+    '-I/usr/include/glib-2.0',
+    '-I/usr/lib64/glib-2.0/include',
+    '-I/usr/include/sysprof-6',
+    '-pthread',
+    '-I/usr/include/webp',
+    '-DWITH_GZFILEOP',
+    '-I/usr/include/pixman-1'
+]
 
 if sys.platform == 'darwin':
      pass
@@ -110,9 +142,9 @@ ext_modules = [
 ]
 
 if os.environ.get("CC", False) == False:
-    os.environ["CC"] = check_output([mapnik_config, '--cxx'])
+    os.environ["CC"] = 'c++'
 if os.environ.get("CXX", False) == False:
-    os.environ["CXX"] = check_output([mapnik_config, '--cxx'])
+    os.environ["CXX"] = 'c++'
 
 setup(
      name="mapnik",
